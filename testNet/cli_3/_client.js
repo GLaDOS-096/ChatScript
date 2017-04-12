@@ -1,8 +1,14 @@
 // Chatroom app for consoles
 // Client side powered by JavaScript
 
+const fs = require('fs')
+const net = require('net')
+var retry = 0
+const maxretry = 8
+var quitting = false
+
 function connect(){
-    var client = require('net').createConnection(9999,'localhost')
+    var client = net.createConnection(9999,'localhost')
     client.on('connect',function(){
         console.log('Client online.')
         retry = 0
@@ -26,10 +32,13 @@ function connect(){
     return client
 }
 
+var config = {}
+fs.readFile('./client_config.json',function(err,data){
+    if (err) throw err
+    config = JSON.parse(data.toString())
+})
+
 var client = connect()
-var retry = 0
-const maxretry = 8
-var quitting = false
 
 process.stdin.resume()
 process.stdin.on('data',function(data){
@@ -39,6 +48,10 @@ process.stdin.on('data',function(data){
         client.end()
         process.exit()
     } else {
-        client.write(data)
+        var msg = {
+            "src": config.username,
+            "msg": config.username+': '+data.toString()
+        }
+        client.write(Buffer(JSON.stringify(msg)))
     }
 })

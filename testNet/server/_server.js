@@ -24,6 +24,7 @@ server.on('connection',function(socket){
         console.log('Client offline.')
         var index = sockets.indexOf(socket)
         sockets.splice(index,1)
+        console.log('Online clients: ',sockets.length)
     })
 })
 
