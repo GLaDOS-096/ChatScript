@@ -11,19 +11,38 @@ console.log('Starting server...')
 
 const server = require('net').createServer().listen(9999)
 // const eol = require('os').EOL
+var Chatrooms = {}
+
 var public = new Chatroom()
 public.id = 0
+
+Chatroom[public.id] = public
+
 console.log('Server running on 127.0.0.1:9999.')
 
 server.on('connection',function(socket){
     public.sockets.push(socket)
     console.log('Client connected.')
-    console.log('Online clients: ',sockets.length)
+    console.log('Online clients: ',public.sockets.length)
     socket.on('data',function(data){
-        var msg = JSON.parse(data.toString())
+        var msg = msg = JSON.parse(data.toString())
         switch(msg.msg.split(' ')[0]){
+            case "online":
+                socket.eol = msg.msg.substring(7)
+                socket.write(JSON.stringify({
+                    "src": "server",
+                    "msg": "Client online."+socket.eol
+                }))
+                break
             case "roomspawn":
-                console.log('Command received from '+msg.src+': '+msg.msg)
+                var __room__ = new Chatroom()
+                socket.write(JSON.stringify({
+                    "src": "server",
+                    "msg": "Room ID: "+__room__.id+socket.eol
+                }))
+                __room__.sockets.push(socket)
+                Chatroom[__room__.id] = __room__
+                public.sockets.splice(public.sockets.indexOf(socket),1)
                 break
             case "roomshut":
                 console.log('Command received from '+msg.src+': '+msg.msg)
@@ -46,9 +65,9 @@ server.on('connection',function(socket){
     })
     socket.on('close',function(){
         console.log('Client offline.')
-        var index = sockets.indexOf(socket)
-        sockets.splice(index,1)
-        console.log('Online clients: ',sockets.length)
+        var index = public.sockets.indexOf(socket)
+        public.sockets.splice(index,1)
+        console.log('Online clients: ',public.sockets.length)
     })
 })
 
