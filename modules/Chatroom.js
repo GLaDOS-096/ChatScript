@@ -15,10 +15,11 @@ var __chatroom__ = {
         }
     },
     "spawnRoom": function spawnRoom(socket){
-        var __room__ = new Chatroom()
+        var self = this
+        var __room__ = new __chatroom__.Chatroom()
         __room__.sockets.push(socket)
-        this.chatrooms[__room__.id] = __room__
-        this.chatrooms[socket.roomId].sockets.splice(this.chatrooms[socket.roomId].sockets.indexOf(socket),1)
+        self.chatrooms[__room__.id] = __room__
+        self.chatrooms[socket.roomId].sockets.splice(self.chatrooms[socket.roomId].sockets.indexOf(socket),1)
         socket.roomId = __room__.id
         return __room__.id
     },
@@ -30,12 +31,13 @@ var __chatroom__ = {
         this.chatrooms[room.roomId] = undefined
     },
     "join": function join(socket,__id__){
+        var self = this
         if (this.chatrooms[__id__] == undefined){
             return "Room not found."
         } else {
-            this.chatrooms[socket.roomId].sockets.splice(this.chatrooms[socket.roomId].sockets.indexOf(socket),1)
-            socket.roomId = __room__.id
-            this.chatrooms[__id__].sockets.push(socket)
+            socket.roomId = __id__
+            self.chatrooms[socket.roomId].sockets.splice(self.chatrooms[socket.roomId].sockets.indexOf(socket),1)
+            self.chatrooms[__id__].sockets.push(socket)
             var __msg__ = "Room " + __id__ + " joined."
             return __msg__
         }
