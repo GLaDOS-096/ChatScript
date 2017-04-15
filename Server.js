@@ -54,7 +54,8 @@ server.on('connection',function(socket){
                     },socket)
                     break
                 case "join":
-                    var __msg__ = Chatroom.join(socket,msg.msg.split(' ')[1])
+                    var id = msg.msg.split(' ')[1]
+                    var __msg__ = Chatroom.join(socket,id)
                     Message.send({
                         "src": "server",
                         "msg": __msg__ + socket.eol
@@ -70,7 +71,7 @@ server.on('connection',function(socket){
                     break
             }
         } catch(e) {
-            console.log('<log> Invalid message received.')
+             console.log('<log> Invalid message received.')
         }
     })
     socket.on('close',function(){
@@ -87,12 +88,34 @@ server.on('close',function(){
     console.log('<log> Server offline.')
 })
 
-// simple command for exit
+// command supports
 process.stdin.resume()
 process.stdin.on('data',function(data){
-    if (data.toString().trim().toLowerCase()==='exit'){
-        console.log('<log> Server closed.')
-        process.exit()
+    if (data.toString().trim().substring(0,1)===':'){
+        var cmdl = data.toString().trim().substring(1,data.toString().trim().length)
+        var command = cmdl.split(' ')[0]
+        switch(command){
+            case "exit":
+                quitting = true
+                console.log('<log> Quitting...')
+                process.exit()
+                break
+            case "roomstat":
+                try {
+                    var __id__ = cmdl.split(' ')[1]
+                    var __room__ = Chatroom.chatrooms[__id__]
+                    console.log('+-------------------------------------')
+                    console.log('| <cmd> Room status of ' + __id__)
+                    console.log('| <res> Online clients: ' + __room__.sockets.length)
+                    console.log('| <res> Room policy: ' + __room__.policy)
+                    console.log('+-------------------------------------')
+                } catch(e) {
+                    console.error('<ERROR> Param error.')
+                }
+                break
+            default:
+                console.error('<ERROR> No such command.')
+        }
     }
 })
 

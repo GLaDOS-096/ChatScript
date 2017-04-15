@@ -35,11 +35,19 @@ var __chatroom__ = {
         if (this.chatrooms[__id__] == undefined){
             return "Room not found."
         } else {
-            socket.roomId = __id__
-            self.chatrooms[socket.roomId].sockets.splice(self.chatrooms[socket.roomId].sockets.indexOf(socket),1)
-            self.chatrooms[__id__].sockets.push(socket)
-            var __msg__ = "Room " + __id__ + " joined."
-            return __msg__
+            if (socket.roomId==undefined){
+                socket.roomId = __id__
+                self.chatrooms[__id__].sockets.push(socket)
+                var __msg__ = "Room " + __id__ + " joined."
+                return __msg__
+            } else {
+                var index = self.chatrooms[socket.roomId].sockets.indexOf(socket)
+                self.chatrooms[socket.roomId].sockets.splice(index,1)
+                socket.roomId = __id__
+                self.chatrooms[__id__].sockets.push(socket)
+                var __msg__ = "Room " + __id__ + " joined."
+                return __msg__
+            }
         }
     },
 }
