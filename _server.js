@@ -25,7 +25,7 @@ server.on('connection',function(socket){
     console.log('Client connected.')
     console.log('Online clients: ',public.sockets.length)
     socket.on('data',function(data){
-        var msg = msg = JSON.parse(data.toString())
+        var msg = JSON.parse(data.toString())
         switch(msg.msg.split(' ')[0]){
             case "online":
                 socket.eol = msg.msg.substring(7)

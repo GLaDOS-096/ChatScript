@@ -17,6 +17,13 @@ var __msg__ = {
         } catch(e) {
             return false
         }
+    },
+    "send": function(msg,socket){
+        socket.write(JSON.stringify(msg))
+    },
+    "stringfy": function stringfy(msg){
+        var __str__ = "<" + msg.src + "> " + msg.msg
+        return __str__
     }
 }
 
