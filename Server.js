@@ -104,11 +104,11 @@ process.stdin.on('data',function(data){
                 try {
                     var __id__ = cmdl.split(' ')[1]
                     var __room__ = Chatroom.chatrooms[__id__]
-                    console.log('+-------------------------------------')
+                    console.log('+----------------------------------------')
                     console.log('| <cmd> Room status of ' + __id__)
                     console.log('| <res> Online clients: ' + __room__.sockets.length)
                     console.log('| <res> Room policy: ' + __room__.policy)
-                    console.log('+-------------------------------------')
+                    console.log('+----------------------------------------')
                 } catch(e) {
                     console.error('<ERROR> Param error.')
                 }
