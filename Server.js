@@ -11,6 +11,7 @@ const publicId = "0"
 const eol = require('os').EOL
 const Message = require("./modules/Message.js")
 const Chatroom = require('./modules/Chatroom.js')
+const Terminal = require('./modules/Terminal.js')
 
 // module check
 if (Message){
@@ -25,10 +26,21 @@ if (Chatroom){
     console.error('<ERROR> Failed to load Chatroom module.')
     process.exit()
 }
+if (Terminal){
+    console.log('<log> Terminal module loaded.')
+} else {
+    console.error('<ERROR> Failed to load Terminal module.')
+    process.exit()
+}
+
+var msgGroup = new Terminal.MsgGroup()
 
 // registering 'connect' events
 server.on('connection',function(socket){
-    console.log('<log> New client online.')
+    msgGroup.log({
+        "src": "log",
+        "msg": "New client online."
+    })
     Chatroom.join(socket,publicId)
     // parsing message from client side
     socket.on('data',function(data){
@@ -76,16 +88,26 @@ server.on('connection',function(socket){
     })
     socket.on('close',function(){
         Chatroom.chatrooms[socket.roomId].sockets.splice(Chatroom.chatrooms[socket.roomId].sockets.indexOf(socket),1)
-        console.log('<log> Client offline.')
+        msgGroup.log({
+            "src": "log",
+            "msg": "Client offline."
+        })
     })
 })
 
 server.on('error',function(err){
-    console.error('<ERROR> Server error: ',err.message)
+    msgGroup.error({
+        "src": "ERROR",
+        "msg": "Server error: " + err.message
+    })
+    process.exit()
 })
 
 server.on('close',function(){
-    console.log('<log> Server offline.')
+    msgGroup.log({
+        "src": "log",
+        "msg": "Server offline."
+    })
 })
 
 // command supports
@@ -97,26 +119,45 @@ process.stdin.on('data',function(data){
         switch(command){
             case "exit":
                 quitting = true
-                console.log('<log> Quitting...')
+                msgGroup.log({
+                    "src": "log",
+                    "msg": "Quitting..."
+                })
                 process.exit()
                 break
             case "roomstat":
                 try {
                     var __id__ = cmdl.split(' ')[1]
                     var __room__ = Chatroom.chatrooms[__id__]
-                    console.log('+----------------------------------------')
-                    console.log('| <cmd> Room status of ' + __id__)
-                    console.log('| <res> Online clients: ' + __room__.sockets.length)
-                    console.log('| <res> Room policy: ' + __room__.policy)
-                    console.log('+----------------------------------------')
+                    msgGroup.initGroup()
+                    msgGroup.pushMsg([{
+                        "src": "cmd",
+                        "msg": "Room status of " + __id__
+                    },{
+                        "src": "res",
+                        "msg": "Online clients: " + __room__.sockets.length
+                    },{
+                        "src": "res",
+                        "msg": "Room policy: " + __room__.policy
+                    }])
+                    msgGroup.endGroup()
                 } catch(e) {
-                    console.error('<ERROR> Param error.')
+                    msgGroup.error({
+                        "src" : "ERROR",
+                        "msg": e
+                    })
                 }
                 break
             default:
-                console.error('<ERROR> No such command.')
+                msgGroup.error({
+                    "src" : "ERROR",
+                    "msg": "No such command."
+                })
         }
     }
 })
 
-console.log('<log> Server running on 127.0.0.1:9999.')
+msgGroup.log({
+    "src": "log",
+    "msg": "Server running on 127.0.0.1:9999."
+})

@@ -33,12 +33,22 @@ var quitting = false
 
 // loading modules
 const Message = require("./modules/Message.js")
+const Terminal = require('./modules/Terminal.js')
+
 if (Message){
     console.log('<log> Message module loaded.')
 } else {
     console.error('<ERROR> Failed to load Message module.')
     process.exit()
 }
+if (Terminal){
+    console.log('<log> Terminal module loaded.')
+} else {
+    console.error('<ERROR> Failed to load Terminal module.')
+    process.exit()
+}
+
+var msgGroup = new Terminal.MsgGroup()
 
 // packed function of connections
 function createClient(){
@@ -51,26 +61,35 @@ function createClient(){
         retry = 0
     })
     client.on('error',function(err){
-        console.error('<ERROR> ',err.message)
+        msgGroup.error({
+            "src": "ERROR",
+            "msg": err.message
+        })
         process.exit()
     })
     client.on('close',function(){
         if (quitting==false){
             if (retry > maxretry){
                 client.end()
-                console.error('<ERROR> Max retry exceeded. Client offline.')
+                msgGroup.error({
+                    "src": "ERROR",
+                    "msg": "Max retry exceeded. Client offline."
+                })
                 process.exit()
             } else {
                 retry += 1
                 setTimeout(createClient,1000)
-                console.log('<log> Reconnecting...')
+                msgGroup.log({
+                    "src": "log",
+                    "msg": "Reconnecting..."
+                })
             }
         }
     })
     client.on('data',function(data){
         try {
             var msg = JSON.parse(data.toString())
-            console.log(Message.stringfy(msg))
+            msgGroup.log(msg)
         } catch(e) {
             throw e
         }
@@ -90,7 +109,10 @@ process.stdin.on('data',function(data){
         switch(command){
             case "exit":
                 quitting = true
-                console.log('<log> Quitting...')
+                msgGroup.log({
+                    "src": "log",
+                    "msg": "Quitting..."
+                })
                 client.end()
                 process.exit()
                 break
@@ -98,10 +120,18 @@ process.stdin.on('data',function(data){
                 var key = cmdl.split(' ')[1]
                 var val = cmdl.split(' ')[2]
                 if (config[key]==undefined){
-                    console.error('<ERROR> No such key.')
+                    msgGroup.error({
+                        "src": "ERROR",
+                        "msg": "No such key."
+                    })
                 } else {
                     fs.writeFile('./client_config.json',JSON.stringify(config),function(err){
-                        if (err) console.error('<ERROR> Modification failed.')
+                        if (err) {
+                            msgGroup.error({
+                                "src": "ERROR",
+                                "msg": "Modification failed."
+                            })
+                        }
                     })
                 }
                 break
@@ -119,6 +149,10 @@ process.stdin.on('data',function(data){
                 },client)
                 break
             default:
+                msgGroup.error({
+                    "src": "ERROR",
+                    "msg": "No such command."
+                })
                 console.error('<ERROR> No such command.')
         }
     } else if (data.toString() != require('os').EOL){
