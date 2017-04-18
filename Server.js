@@ -11,6 +11,7 @@ var config = {
     "ip": "127.0.0.1",
     "port": 9999
 }
+
 /* fs.readFile('./config.json',function(err,data){
     if (err){
         // console.error('<ERROR> '+err.message)
@@ -80,7 +81,7 @@ server.on('connection',function(socket){
                     var __id__ = Chatroom.spawnRoom(socket)
                     Message.send({
                         "src": "server",
-                        "msg": "Room ID: " + __id__ + socket.eol
+                        "msg": "Room ID: " + __id__
                     },socket)
                     break
                 case ":roomshut":
@@ -88,7 +89,7 @@ server.on('connection',function(socket){
                     Chatroom.shutRoom(Chatroom.chatrooms[socket.roomId])
                     Message.send({
                         "src": "server",
-                        "msg": "Room " + __id__ + " shut." + socket.eol
+                        "msg": "Room " + __id__ + " shut."
                     },socket)
                     break
                 case ":join":
@@ -132,7 +133,7 @@ server.on('connection',function(socket){
                     }
                     break
                 default:
-                    console.log('<DATA> ',Message.stringfy(msg).substring(0,Message.stringfy(msg).length-socket.eol.length))
+                    // console.log('<DATA> ',Message.stringfy(msg).substring(0,Message.stringfy(msg).length-socket.eol.length))
                     Chatroom.chatrooms[socket.roomId].sockets.forEach(function(__socket__){
                         if (__socket__!=socket){
                             Message.send(msg,__socket__)
@@ -191,6 +192,10 @@ process.stdin.on('data',function(data){
                     var __id__ = cmdl.split(' ')[1]
                     var __room__ = Chatroom.chatrooms[__id__]
                     msgGroup.initGroup()
+                    /* msgGroup.log({
+                        "src": "system",
+                        "msg": "This is a test."
+                    }) */
                     msgGroup.pushMsg([{
                         "src": "cmd",
                         "msg": "Room status of " + __id__

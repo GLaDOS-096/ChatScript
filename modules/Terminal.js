@@ -76,13 +76,13 @@ var Terminal = {
             }
         }
         self.endGroup = function endGroup(){
+            self.__proxy__ = false
+            console.log(self.__promptLine__)
             self.__cache__.forEach(function(msg){
                 self.log(msg)
             })
             self.__prompt__ = ""
             self.__cache__ = []
-            self.__proxy__ = false
-            console.log(self.__promptLine__)
         }
     }
 }

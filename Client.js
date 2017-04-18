@@ -8,8 +8,12 @@ const fs = require('fs')
 
 // reading config
 console.log('<log> Loading personal config...')
-var config = {}
-fs.readFile('./client_config.json',function(err,data){
+var config = {
+    "serverIp": "127.0.0.1",
+    "port": 9999,
+    "username": "client"
+}
+/* fs.readFile('./client_config.json',function(err,data){
     if (err){
         // console.error('<ERROR> '+err.message)
         // process.exit()
@@ -27,7 +31,7 @@ fs.readFile('./client_config.json',function(err,data){
             process.exit()
         }
     }
-})
+}) */
 
 // loading constants
 var retry = 0
@@ -97,7 +101,7 @@ function createClient(){
             throw e
         }
     })
-    client.pipe(process.stdout,{end:false})
+    // client.pipe(process.stdout,{end:false})
     return client
 }
 
@@ -163,7 +167,7 @@ process.stdin.on('data',function(data){
     } else if (data.toString() != require('os').EOL){
         Message.send({
             "src": config.username,
-            "msg": data.toString()
+            "msg": data.toString().substring(0,data.toString().length-require('os').EOL.length)
         },client)
     }
 })
@@ -172,4 +176,3 @@ msgGroup.log({
     "src": "log",
     "msg": "Client started."
 })
-console.log('<log> Client started.')
