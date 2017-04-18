@@ -3,8 +3,34 @@
 // Server side powered by JavaScript
 
 console.log('<log> Starting server...')
+const fs = require('fs')
 
-const server = require('net').createServer().listen(9999)
+// reading config
+console.log('<log> Loading personal config...')
+var config = {
+    "ip": "127.0.0.1",
+    "port": 9999
+}
+/* fs.readFile('./config.json',function(err,data){
+    if (err){
+        // console.error('<ERROR> '+err.message)
+        // process.exit()
+        // using fake config data here
+        config = {
+            "ip": "127.0.0.1",
+            "port": 9999
+        }
+    } else {
+        try {
+            config = JSON.parse(data.toString())
+        } catch(err) {
+            console.error('<ERROR> Config file illegal.')
+            process.exit()
+        }
+    }
+}) */
+
+const server = require('net').createServer().listen(config.port)
 
 // loading constants and dependencies
 const publicId = "0"
@@ -47,17 +73,17 @@ server.on('connection',function(socket){
         try {
             var msg = JSON.parse(data.toString())
             switch(msg.msg.split(' ')[0]){
-                case "online":
+                case ":online":
                     socket.eol = msg.msg.substring(7)
                     break
-                case "roomspawn":
+                case ":roomspawn":
                     var __id__ = Chatroom.spawnRoom(socket)
                     Message.send({
                         "src": "server",
                         "msg": "Room ID: " + __id__ + socket.eol
                     },socket)
                     break
-                case "roomshut":
+                case ":roomshut":
                     var __id__ = socket.roomId
                     Chatroom.shutRoom(Chatroom.chatrooms[socket.roomId])
                     Message.send({
@@ -65,13 +91,45 @@ server.on('connection',function(socket){
                         "msg": "Room " + __id__ + " shut." + socket.eol
                     },socket)
                     break
-                case "join":
+                case ":join":
                     var id = msg.msg.split(' ')[1]
                     var __msg__ = Chatroom.join(socket,id)
                     Message.send({
                         "src": "server",
                         "msg": __msg__ + socket.eol
                     },socket)
+                    break
+                case ":setpolicy":
+                    var policy = msg.msg.split(' ')[1]
+                    if (socket.roomId==publicId){
+                        Message.send({
+                            "src": "server",
+                            "msg": "Cannot change the policy of Room 0."
+                        },socket)
+                    } else {
+                        var room = Chatroom.chatrooms[socket.roomId]
+                        if (policy=="private" || policy=="public"){
+                            if (policy!=room.policy){
+                                room.policy = policy
+                            }
+                        } else {
+                            Message.send({
+                                "src": "server",
+                                "msg": "Policy param error."
+                            },socket)
+                        }
+                    }
+                    break
+                case ":setlimit":
+                    var limit = Number(msg.msg.split(' ')[1])
+                    if (limit==NaN || limit<=Chatroom.chatrooms[socket.roomId].sockets.length){
+                        Message.send({
+                            "src": "server",
+                            "msg": "Limit param error."
+                        },socket)
+                    } else {
+                        Chatroom.chatrooms[socket.roomId].limit = limit
+                    }
                     break
                 default:
                     console.log('<DATA> ',Message.stringfy(msg).substring(0,Message.stringfy(msg).length-socket.eol.length))
@@ -83,7 +141,10 @@ server.on('connection',function(socket){
                     break
             }
         } catch(e) {
-             console.log('<log> Invalid message received.')
+            msgGroup.log({
+                "src" : "log",
+                "msg": "Invalid message received."
+            })
         }
     })
     socket.on('close',function(){
@@ -159,5 +220,5 @@ process.stdin.on('data',function(data){
 
 msgGroup.log({
     "src": "log",
-    "msg": "Server running on 127.0.0.1:9999."
+    "msg": "Server running on " + config.ip + ":" + config.port + "."
 })

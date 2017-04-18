@@ -13,7 +13,10 @@ fs.readFile('./client_config.json',function(err,data){
     if (err){
         // console.error('<ERROR> '+err.message)
         // process.exit()
+        // using fake config data here
         config = {
+            "serverIp": "127.0.0.1",
+            "port": 9999,
             "username": "client"
         }
     } else {
@@ -52,11 +55,11 @@ var msgGroup = new Terminal.MsgGroup()
 
 // packed function of connections
 function createClient(){
-    var client = net.connect(9999,'localhost')
+    var client = net.connect(config.port,config.serverIp)
     client.on('connect',function(){
         Message.send({
             "src": config.username,
-            "msg": "online " + require('os').EOL
+            "msg": ":online " + require('os').EOL
         },client)
         retry = 0
     })
@@ -137,15 +140,18 @@ process.stdin.on('data',function(data){
                 break
             case "roomspawn":
             case "roomshut":
+            case "roomstat": // this command no reply yet
                 Message.send({
                     "src": config.username,
-                    "msg": command
+                    "msg": ":" + command
                 },client)
                 break
+            case "setpolicy":
+            case "setlimit":
             case "join":
                 Message.send({
                     "src": config.username,
-                    "msg": cmdl
+                    "msg": ":" + cmdl
                 },client)
                 break
             default:
@@ -153,7 +159,6 @@ process.stdin.on('data',function(data){
                     "src": "ERROR",
                     "msg": "No such command."
                 })
-                console.error('<ERROR> No such command.')
         }
     } else if (data.toString() != require('os').EOL){
         Message.send({
@@ -163,4 +168,8 @@ process.stdin.on('data',function(data){
     }
 })
 
+msgGroup.log({
+    "src": "log",
+    "msg": "Client started."
+})
 console.log('<log> Client started.')

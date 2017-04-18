@@ -6,12 +6,14 @@ var __chatroom__ = {
         this.id = String(Math.random())
         this.sockets = []
         this.policy = "public"
+        this.limit = 4
     },
     "chatrooms": {
         "0": {
             id: 0,
             sockets: [],
-            policy: "public"
+            policy: "public",
+            limit: 1024
         }
     },
     "spawnRoom": function spawnRoom(socket){
@@ -32,9 +34,9 @@ var __chatroom__ = {
     },
     "join": function join(socket,__id__){
         var self = this
-        if (this.chatrooms[__id__] == undefined){
+        if (self.chatrooms[__id__] == undefined || self.chatrooms[__id__].policy=="private"){
             return "Room not found."
-        } else {
+        } else if (self.chatrooms[__id__].sockets.length<self.chatrooms[__id__].limit){
             if (socket.roomId==undefined){
                 socket.roomId = __id__
                 self.chatrooms[__id__].sockets.push(socket)
@@ -48,6 +50,8 @@ var __chatroom__ = {
                 var __msg__ = "Room " + __id__ + " joined."
                 return __msg__
             }
+        } else {
+            return "Limit reached."
         }
     },
 }
