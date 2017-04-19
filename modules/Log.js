@@ -61,7 +61,7 @@ var Logger = function Logger(logger) {
         var logName = (function(){
             var year = __date__.getFullYear().toString()
             var month = __date__.getMonth().toString()
-            if (month.length==){
+            if (month.length==1){
                 month = "0" + month
             }
             var day = __date__.getDate().toString()
