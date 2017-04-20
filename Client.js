@@ -9,7 +9,7 @@ const fs = require('fs')
 // reading config
 console.log('<log> Loading personal config...')
 var config = {
-    "serverIp": "127.0.0.1",
+    "serverIp": "10.7.3.165",
     "port": 9999,
     "username": "client"
 }
