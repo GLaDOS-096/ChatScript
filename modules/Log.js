@@ -9,7 +9,7 @@ var Logger = function Logger(logger) {
     self.tickrate = logger.tickrate || 2000
     self.logPath = (function (path) {
         return function logPath() {
-            return path || process.cwd() + "/log"
+            return path || process.cwd() + "/logs"
         }
     })(logger.path)
     self.missionStack = []
@@ -56,7 +56,7 @@ var Logger = function Logger(logger) {
     self.stopTick = function stopTick(tick) {
         clearInterval(tick)
     }
-    self.log = function log(msg){
+    self.writeLog = function log(msg){
         var __date__ = new Date()
         var logName = (function(){
             var year = __date__.getFullYear().toString()

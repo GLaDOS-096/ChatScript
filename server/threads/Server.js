@@ -1,6 +1,6 @@
 // Chatroom app for consoles
 // This is a no-hard-code version
-// Server side powered by JavaScript
+// Server thread powered by JavaScript
 
 console.log('<log> Starting server...')
 const fs = require('fs')

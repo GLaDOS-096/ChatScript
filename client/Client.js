@@ -8,30 +8,23 @@ const fs = require('fs')
 
 // reading config
 console.log('<log> Loading personal config...')
-var config = {
-    "serverIp": "10.7.3.165",
-    "port": 9999,
-    "username": "client"
-}
-/* fs.readFile('./client_config.json',function(err,data){
-    if (err){
-        // console.error('<ERROR> '+err.message)
-        // process.exit()
-        // using fake config data here
-        config = {
-            "serverIp": "127.0.0.1",
-            "port": 9999,
-            "username": "client"
-        }
-    } else {
-        try {
-            config = JSON.parse(data.toString())
-        } catch(err) {
-            console.error('<ERROR> Config file illegal.')
+var config = (function(){
+    var __config__ = {}
+    fs.readFile('./client_config.json',function(err,data){
+        if (err){
+            console.error('<ERROR> '+err.message)
             process.exit()
+        } else {
+            try {
+                __config__ = JSON.parse(data.toString())
+            } catch(err) {
+                console.error('<ERROR> Config file illegal.')
+                process.exit()
+            }
         }
-    }
-}) */
+    })
+    return __config__
+})()
 
 // loading constants
 var retry = 0
@@ -77,7 +70,6 @@ function createClient(){
     client.on('close',function(){
         if (quitting==false){
             if (retry > maxretry){
-                client.end()
                 msgGroup.error({
                     "src": "ERROR",
                     "msg": "Max retry exceeded. Client offline."

@@ -3,8 +3,9 @@
 
 var __msg__ = {
     "MSG": function MSG(msg){
-        this.src = msg.src
-        this.msg = msg.msg
+        var self = this
+        self.src = msg.src
+        self.msg = msg.msg
     },
     "isMSG": function isMSG(data){
         try {
