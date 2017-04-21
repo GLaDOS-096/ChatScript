@@ -209,14 +209,14 @@ process.stdin.on('data',function(data){
                     msgGroup.endGroup()
                 } catch(e) {
                     msgGroup.error({
-                        "src" : "ERROR",
+                        "src": "ERROR",
                         "msg": e
                     })
                 }
                 break
             default:
                 msgGroup.error({
-                    "src" : "ERROR",
+                    "src": "ERROR",
                     "msg": "No such command."
                 })
         }
