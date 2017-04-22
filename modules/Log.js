@@ -7,11 +7,7 @@ const message = require('./Message.js')
 var Logger = function Logger(logger) {
     var self = this
     self.tickrate = logger.tickrate || 2000
-    self.logPath = (function (path) {
-        return function logPath() {
-            return path || process.cwd() + "/logs"
-        }
-    })(logger.path)
+    self.logPath = logger.path
     self.missionStack = []
     self.registerTickMission = function registerTickMission(mission) {
         if (mission.name) {

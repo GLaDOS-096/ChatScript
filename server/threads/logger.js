@@ -7,7 +7,7 @@ const message = require('./modules/Message.js')
 
 var Logger = new logger({
     "tickrate": 1000,
-    "logPath": process.cwd()
+    "path": "./logs"
 })
 
 process.stdin.on('data',function(data){

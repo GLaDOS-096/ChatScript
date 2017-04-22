@@ -1,12 +1,13 @@
 // Chatroom app for consoles
 // This is a no-hard-code version
 // Server thread powered by JavaScript
+const eol = require('os').EOL
 
-console.log('<log> Starting server...')
+process.stdout.write('<log> Starting server...'+eol)
 const fs = require('fs')
 
 // reading config
-console.log('<log> Loading server side config...')
+process.stdout.write('<log> Loading server side config...'+eol)
 var config = {
     "ip": "127.0.0.1",
     "port": 9999
@@ -35,14 +36,13 @@ const server = require('net').createServer().listen(config.port)
 
 // loading constants and dependencies
 const publicId = "0"
-const eol = require('os').EOL
 const Message = require("./modules/Message.js")
 const Chatroom = require('./modules/Chatroom.js')
 const Terminal = require('./modules/Terminal.js')
 
 // module check
 if (Message) {
-    console.log('<log> Message module loaded.')
+    process.stdout.write('<log> Message module loaded.'+eol)
 } else {
     console.error('<ERROR> Failed to load Message module.')
     process.stdout.write(JSON.stringify({
@@ -53,7 +53,7 @@ if (Message) {
     process.exit()
 }
 if (Chatroom) {
-    console.log('<log> Chatroom module loaded.')
+    process.stdout.write('<log> Chatroom module loaded.'+eol)
 } else {
     console.error('<ERROR> Failed to load Chatroom module.')
     process.stdout.write(JSON.stringify({
@@ -64,9 +64,8 @@ if (Chatroom) {
     process.exit()
 }
 if (Terminal) {
-    console.log('<log> Terminal module loaded.')
+    process.stdout.write('<log> Terminal module loaded.'+eol)
 } else {
-    console.error('<ERROR> Failed to load Terminal module.')
     process.stdout.write(JSON.stringify({
         "src": "ERROR",
         "msg": "Failed to load Terminal module.",
@@ -165,7 +164,6 @@ server.on('connection', function (socket) {
                     }
                     break
                 default:
-                    // console.log('<DATA> ',Message.stringfy(msg).substring(0,Message.stringfy(msg).length-socket.eol.length))
                     Chatroom.chatrooms[socket.roomId].sockets.forEach(function (__socket__) {
                         if (__socket__ != socket) {
                             Message.send(msg, __socket__)

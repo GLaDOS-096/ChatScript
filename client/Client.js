@@ -10,7 +10,7 @@ const fs = require('fs')
 console.log('<log> Loading personal config...')
 var config = (function(){
     var __config__ = {}
-    fs.readFile('./client_config.json',function(err,data){
+    fs.readFile('./config/config.json',function(err,data){
         if (err){
             console.error('<ERROR> '+err.message)
             process.exit()
@@ -52,7 +52,8 @@ var msgGroup = new Terminal.MsgGroup()
 
 // packed function of connections
 function createClient(){
-    var client = net.connect(config.port,config.serverIp)
+    console.log(config)
+    var client = net.connect(9999,"127.0.0.1")
     client.on('connect',function(){
         Message.send({
             "src": config.username,

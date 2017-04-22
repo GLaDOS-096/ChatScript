@@ -3,7 +3,7 @@
 // CORE powered by JavaScript
 
 // loading dependencies
-const logger = require('./threads/modules.Log.js')
+const logger = require('./modules/Log.js')
 
 // loading CORE
 var CORE = {
@@ -11,16 +11,13 @@ var CORE = {
     __spawn__: require('child_process').spawn,
     startServer: function startServer(path) {
         var server = CORE.__spawn__('nodejs', [path])
-        server.stdout.on('data', function (data) {
-            process.stdout.write(data)
-        })
         server.stderr.on('data', function (data) {
             process.stdout.write(data)
         })
         server.on('exit', function () {
             server = CORE.startServer()
         })
-        CORE.__servers__.push(server)
+        CORE.__threads__.push(server)
         return server
     },
 }
