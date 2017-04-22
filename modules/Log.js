@@ -67,11 +67,13 @@ var Logger = function Logger(logger) {
             var day = __date__.getDate().toString()
             return year+month+day+".log"
         })()
-        var log = __date__.toLocaleString() + message.stringfy(msg)
-        fs.appendFile(path+"/"+logName,log,function(err){
+        var log = __date__.toLocaleString() + " " + message.stringfy(msg) + require('os').EOL
+        fs.appendFile(self.logPath+"/"+logName,log,function(err){
             if (err){
                 throw err
             }
         })
     }
 }
+
+module.exports = Logger

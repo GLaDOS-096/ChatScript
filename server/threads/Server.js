@@ -6,7 +6,7 @@ console.log('<log> Starting server...')
 const fs = require('fs')
 
 // reading config
-console.log('<log> Loading personal config...')
+console.log('<log> Loading server side config...')
 var config = {
     "ip": "127.0.0.1",
     "port": 9999
@@ -41,39 +41,54 @@ const Chatroom = require('./modules/Chatroom.js')
 const Terminal = require('./modules/Terminal.js')
 
 // module check
-if (Message){
+if (Message) {
     console.log('<log> Message module loaded.')
 } else {
     console.error('<ERROR> Failed to load Message module.')
+    process.stdout.write(JSON.stringify({
+        "src": "ERROR",
+        "msg": "Failed to load Message module.",
+        "flag": "log"
+    }))
     process.exit()
 }
-if (Chatroom){
+if (Chatroom) {
     console.log('<log> Chatroom module loaded.')
 } else {
     console.error('<ERROR> Failed to load Chatroom module.')
+    process.stdout.write(JSON.stringify({
+        "src": "ERROR",
+        "msg": "Failed to load Chatroom module.",
+        "flag": "log"
+    }))
     process.exit()
 }
-if (Terminal){
+if (Terminal) {
     console.log('<log> Terminal module loaded.')
 } else {
     console.error('<ERROR> Failed to load Terminal module.')
+    process.stdout.write(JSON.stringify({
+        "src": "ERROR",
+        "msg": "Failed to load Terminal module.",
+        "flag": "log"
+    }))
     process.exit()
 }
 
 var msgGroup = new Terminal.MsgGroup()
 
 // registering 'connect' events
-server.on('connection',function(socket){
+server.on('connection', function (socket) {
     msgGroup.log({
         "src": "log",
         "msg": "New client online."
     })
-    Chatroom.join(socket,publicId)
+    Chatroom.join(socket, publicId)
     // parsing message from client side
-    socket.on('data',function(data){
+    socket.on('data', function (data) {
         try {
             var msg = JSON.parse(data.toString())
-            switch(msg.msg.split(' ')[0]){
+            switch (msg.msg.split(' ')[0]) {
                 case ":online":
                     socket.eol = msg.msg.substring(7)
                     break
@@ -82,7 +97,12 @@ server.on('connection',function(socket){
                     Message.send({
                         "src": "server",
                         "msg": "Room ID: " + __id__
-                    },socket)
+                    }, socket)
+                    Message.send({
+                        "src": "log",
+                        "msg": "Room ID: " + __id__ + " spawned.",
+                        "flags": "log"
+                    }, process.stdout)
                     break
                 case ":roomshut":
                     var __id__ = socket.roomId
@@ -90,66 +110,78 @@ server.on('connection',function(socket){
                     Message.send({
                         "src": "server",
                         "msg": "Room " + __id__ + " shut."
-                    },socket)
+                    }, socket)
+                    Message.send({
+                        "src": "server",
+                        "msg": "Room " + __id__ + " shut."
+                    }, process.stdout)
                     break
                 case ":join":
                     var id = msg.msg.split(' ')[1]
-                    var __msg__ = Chatroom.join(socket,id)
+                    var __msg__ = Chatroom.join(socket, id)
                     Message.send({
                         "src": "server",
                         "msg": __msg__ + socket.eol
-                    },socket)
+                    }, socket)
                     break
                 case ":setpolicy":
                     var policy = msg.msg.split(' ')[1]
-                    if (socket.roomId==publicId){
+                    if (socket.roomId == publicId) {
                         Message.send({
                             "src": "server",
                             "msg": "Cannot change the policy of Room 0."
-                        },socket)
+                        }, socket)
                     } else {
                         var room = Chatroom.chatrooms[socket.roomId]
-                        if (policy=="private" || policy=="public"){
-                            if (policy!=room.policy){
+                        if (policy == "private" || policy == "public") {
+                            if (policy != room.policy) {
                                 room.policy = policy
+                                Message.send({
+                                    "src": "server",
+                                    "msg": "Room " + socket.roomId + " policy set to " + policy + "."
+                                }, process.stdout)
                             }
                         } else {
                             Message.send({
                                 "src": "server",
                                 "msg": "Policy param error."
-                            },socket)
+                            }, socket)
                         }
                     }
                     break
                 case ":setlimit":
                     var limit = Number(msg.msg.split(' ')[1])
-                    if (limit==NaN || limit<=Chatroom.chatrooms[socket.roomId].sockets.length){
+                    if (limit == NaN || limit <= Chatroom.chatrooms[socket.roomId].sockets.length) {
                         Message.send({
                             "src": "server",
                             "msg": "Limit param error."
-                        },socket)
+                        }, socket)
                     } else {
                         Chatroom.chatrooms[socket.roomId].limit = limit
+                        Message.send({
+                            "src": "server",
+                            "msg": "Room " + socket.roomId + " limit set to " + limit + "."
+                        }, process.stdout)
                     }
                     break
                 default:
                     // console.log('<DATA> ',Message.stringfy(msg).substring(0,Message.stringfy(msg).length-socket.eol.length))
-                    Chatroom.chatrooms[socket.roomId].sockets.forEach(function(__socket__){
-                        if (__socket__!=socket){
-                            Message.send(msg,__socket__)
+                    Chatroom.chatrooms[socket.roomId].sockets.forEach(function (__socket__) {
+                        if (__socket__ != socket) {
+                            Message.send(msg, __socket__)
                         }
                     })
                     break
             }
-        } catch(e) {
+        } catch (e) {
             msgGroup.log({
-                "src" : "log",
+                "src": "log",
                 "msg": "Invalid message received."
             })
         }
     })
-    socket.on('close',function(){
-        Chatroom.chatrooms[socket.roomId].sockets.splice(Chatroom.chatrooms[socket.roomId].sockets.indexOf(socket),1)
+    socket.on('close', function () {
+        Chatroom.chatrooms[socket.roomId].sockets.splice(Chatroom.chatrooms[socket.roomId].sockets.indexOf(socket), 1)
         msgGroup.log({
             "src": "log",
             "msg": "Client offline."
@@ -157,7 +189,7 @@ server.on('connection',function(socket){
     })
 })
 
-server.on('error',function(err){
+server.on('error', function (err) {
     msgGroup.error({
         "src": "ERROR",
         "msg": "Server error: " + err.message
@@ -165,7 +197,7 @@ server.on('error',function(err){
     process.exit()
 })
 
-server.on('close',function(){
+server.on('close', function () {
     msgGroup.log({
         "src": "log",
         "msg": "Server offline."
@@ -174,11 +206,11 @@ server.on('close',function(){
 
 // command supports
 process.stdin.resume()
-process.stdin.on('data',function(data){
-    if (data.toString().trim().substring(0,1)===':'){
-        var cmdl = data.toString().trim().substring(1,data.toString().trim().length)
+process.stdin.on('data', function (data) {
+    if (data.toString().trim().substring(0, 1) === ':') {
+        var cmdl = data.toString().trim().substring(1, data.toString().trim().length)
         var command = cmdl.split(' ')[0]
-        switch(command){
+        switch (command) {
             case "exit":
                 quitting = true
                 msgGroup.log({
@@ -199,15 +231,15 @@ process.stdin.on('data',function(data){
                     msgGroup.pushMsg([{
                         "src": "cmd",
                         "msg": "Room status of " + __id__
-                    },{
+                    }, {
                         "src": "res",
                         "msg": "Online clients: " + __room__.sockets.length
-                    },{
+                    }, {
                         "src": "res",
                         "msg": "Room policy: " + __room__.policy
                     }])
                     msgGroup.endGroup()
-                } catch(e) {
+                } catch (e) {
                     msgGroup.error({
                         "src": "ERROR",
                         "msg": e

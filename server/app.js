@@ -1,26 +1,47 @@
 // Chatroom app for consoles
 // This is a no-hard-code version
-// Server app powered by JavaScript
+// App powered by JavaScript
+
+console.log("<system> Process PID: " + process.pid)
+console.log("<system> Loading app...")
 
 // loading CORE
-var CORE = {
-    __spawn__: require('child_process').spawn,
-    spawnServer: function spawnServer() {
-        var server = CORE.__spawn__('nodejs', [process.cwd() + '/server/threads/Server.js'])
-        process.stdin.on('data', function (data) {
-            server.stdin.write(data.toString())
-        })
-        server.stdout.on('data', function (data) {
-            process.stdout.write(data)
-        })
-        server.stderr.on('data', function (data) {
-            process.stdout.write(data)
-        })
-        server.on('exit', function () {
-            server = CORE.spawnServer()
-        })
-        return server
-    },
+const CORE = require('./threads/CORE.js')
+console.log("asdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasd")
+const logger = require('./threads/modules/Log.js')
+const message = require('./threads/modules/Message.js')
+const child_process = require('child_process')
+
+// check
+if (CORE){
+    console.log('<system> CORE loaded.')
+} else {
+    console.error('<ERROR> Failed to load CORE.')
+    process.exit()
 }
 
-server = CORE.spawnServer()
+// Registering Log process
+var thr_log = CORE.startServer('./threads/logger.js')
+message.send({
+    "src": "system",
+    "msg": "App PID: " + process.pid,
+    "flag": "log"
+},thr_log)
+
+// Registering Server process
+var thr_server = CORE.startServer('./threads/server.js')
+thr_server.stdout.on('data',function(data){
+    if (message.isMSG(data)){
+        var msg = JSON.parse(data.toString())
+        if (msg.flag=="log"){
+            thr_log.stdin.write(data)
+        } else {
+            message.send(msg,process.stdout)
+        }
+    } else {
+        process.stdout.write(data.toString())
+    }
+})
+process.stdin.on('data',function(data){
+    thr_server.stdin.write(data)
+})

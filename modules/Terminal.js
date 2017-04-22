@@ -67,6 +67,14 @@ var Terminal = {
             } else {
                 console.log(message.stringfy(msg))
             }
+            message.send((function(msg){
+                var __msg__ = {
+                    "src": msg.src,
+                    "msg": msg.msg,
+                    "flag": "log"
+                }
+                return __msg__
+            })(msg),process.stdout)
         }
         self.error = function error(msg){
             if (self.__proxy__==true){
@@ -74,6 +82,14 @@ var Terminal = {
             } else {
                 console.error(message.stringfy(msg))
             }
+            message.send((function(msg){
+                var __msg__ = {
+                    "src": msg.src,
+                    "msg": msg.msg,
+                    "flag": "log"
+                }
+                return __msg__
+            })(msg),process.stdout)
         }
         self.endGroup = function endGroup(){
             self.__proxy__ = false

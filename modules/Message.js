@@ -6,6 +6,7 @@ var __msg__ = {
         var self = this
         self.src = msg.src
         self.msg = msg.msg
+        self.flag = msg.flag
     },
     "isMSG": function isMSG(data){
         try {
@@ -20,7 +21,13 @@ var __msg__ = {
         }
     },
     "send": function(msg,socket){
-        socket.write(JSON.stringify(msg))
+        if (msg instanceof Array){
+            msg.forEach(function(item){
+                socket.write(JSON.stringify(msg))
+            })
+        } else {
+            socket.write(JSON.stringify(msg))
+        }
     },
     "stringfy": function stringfy(msg){
         var __str__ = "<" + msg.src + "> " + msg.msg
