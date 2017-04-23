@@ -15,7 +15,7 @@ var CORE = {
             process.stdout.write(data)
         })
         server.on('exit', function () {
-            server = CORE.startServer()
+            server = CORE.startServer(path)
         })
         CORE.__threads__.push(server)
         return server

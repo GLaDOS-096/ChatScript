@@ -29,20 +29,29 @@ message.send({
 }, thr_log.stdin)
 
 // Registering Server process
-var thr_server = CORE.startServer('./threads/Server.js')
-
-thr_server.stdout.on('data', function (data) {
-    if (message.isMSG(data)) {
-        var msg = JSON.parse(data.toString())
-        if (msg.flag == "log") {
-            message.send(msg, thr_log.stdin)
+function registerServerThread() {
+    __server__ = CORE.startServer('./threads/Server.js')
+    __server__.stdout.on('data', function (data) {
+        if (message.isMSG(data)) {
+            var msg = JSON.parse(data.toString())
+            if (msg.flag == "log") {
+                message.send(msg, thr_log.stdin)
+            }
+            console.log(message.stringfy(msg))  // fuck this piece of shit
+        } else {
+            process.stdout.write(data.toString())
         }
-        console.log(message.stringfy(msg))  // fuck this piece of shit
-    } else {
-        process.stdout.write(data.toString())
-    }
-})
+    })
+    process.stdin.on('data', function (data) {
+        __server__.stdin.write(data)
+    })
+    return __server__
+}
 
-process.stdin.on('data', function (data) {
-    thr_server.stdin.write(data)
+var thr_server = registerServerThread()
+
+process.stdin.on('data',function(data){
+    if (data.toString()===":exit"+eol){
+        process.exit()
+    }
 })
