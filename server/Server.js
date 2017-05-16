@@ -75,7 +75,7 @@ if (Terminal) {
     process.exit()
 }
 
-var thr_log = spawn('./threads/logger.js')
+const thr_log = spawn('nodejs',['./threads/logger.js'])
 
 var msgGroup = new Terminal.MsgGroup(thr_log)
 

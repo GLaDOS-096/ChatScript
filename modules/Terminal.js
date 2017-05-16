@@ -38,8 +38,13 @@ var Terminal = {
         }
     },
     // class Terminal.MsgGroup
-    "MsgGroup": function MsgGroup() {
+    "MsgGroup": function MsgGroup(log_proc) {
+        if (log_proc==undefined){
+            console.log("<FATAL> LOG Process not found.")
+            return 0
+        }
         var self = this
+        this.__logger__ = log_proc.stdin
         self.__cache__ = []
         self.__proxy__ = false
         self.__prompt__ = ""
@@ -66,15 +71,16 @@ var Terminal = {
             if (self.__proxy__ == true) {
                 self.__cache__.push(msg)
             } else {
-                message.send((function (msg) {
-                    var __msg__ = {
-                        "src": msg.src,
-                        "msg": msg.msg,
-                        "flag": "log"
-                    }
-                    return __msg__
-                })(message.stringfy(msg)), process.stdout)
+                process.stdout.write(message.stringfy(msg) + eol)
             }
+            message.send((function (msg) {
+                var __msg__ = {
+                    "src": msg.src || "log",
+                    "msg": msg.msg || msg,
+                    "flag": "log"
+                }
+                return __msg__
+            })(msg), self.__logger__)
         }
         self.error = function error(msg) {
             if (self.__proxy__ == true) {
@@ -84,12 +90,12 @@ var Terminal = {
             }
             message.send((function (msg) {
                 var __msg__ = {
-                    "src": msg.src,
-                    "msg": msg.msg,
+                    "src": msg.src || "ERROR",
+                    "msg": msg.msg || msg,
                     "flag": "log"
                 }
                 return __msg__
-            })(msg), process.stdout)
+            })(msg), self.__logger__)
         }
         self.endGroup = function endGroup() {
             self.__proxy__ = false
