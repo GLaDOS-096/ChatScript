@@ -1,4 +1,2 @@
-/tests/
-/server/modules
-/client/modules
-/server/logs
+/_
+/.vscode
