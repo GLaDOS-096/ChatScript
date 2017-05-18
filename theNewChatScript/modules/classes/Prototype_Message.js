@@ -12,7 +12,7 @@
             content:   The content string of the message. Could not be omitted.
  */
 
-const ERR_CODE = require('./ERR_CODE.js')
+const ERR_CODE = require('./_ERR_CODE_.js')
 
 var Message  = function Message(__MsgPrototype__){
     var self = this
