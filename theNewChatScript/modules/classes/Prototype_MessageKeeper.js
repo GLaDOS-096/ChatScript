@@ -6,6 +6,7 @@
             generate(Object):               THE ONLY WAY to generate a message. Returns an Object<#Message>.
             serialize(Object<#Message>):    THE ONLY WAY to serialize a message to pass through TCP/UDP.
             unserialize(Object<#Buffer>):   THE ONLY WAY to unseralize a message.
+            standardize(Object):            The way to 
         class Message(Object):
             src:       The source of the message. Cannot be ommited.
             type:      The type of the message. Could be 'command','text','log','error',etc. It be 'text' while ommited.
@@ -29,6 +30,15 @@ var MessageKeeper = function MessageKeeper(){
             return __Message__
         } else {
             return ERR_CODE.MESSAGE_INVALID
+        }
+    }
+    self.standardize = function MessageStandardize(__MsgInstance__){
+        if (__MsgInstance__ instanceof Message){
+            __MsgInstance__.src = __MsgInstance__.src || "ANONYMUS"
+            __MsgInstance__.type = __MsgInstance__.type || "text"
+            return __MsgInstance__
+        } else {
+            // handle this error
         }
     }
     self.serialize = function MessageSerialize(__MsgInstance__){
