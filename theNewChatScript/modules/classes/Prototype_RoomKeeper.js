@@ -1,7 +1,15 @@
 /*  
     RoomKeeper for ChatScript.
     Turns out to be the universal message template across the app.
-
+    Usage:
+        Chatroom():         The prototype of Chatroom instance.
+        Chatrooms:          The object to keep all the Chatroom() instances by index.
+                            Automatilcaly with an undeletable '0' public room inside.
+        spawnRoom(socket):  Create a room according to the client that pushes this request.
+                            Returns a specified new rooom ID.
+        shutRoom(roomId):   Shut the room down according to its ID.
+                            Move all the sockets to room '0'.
+        join(roomId):       Change the room of the socket that pushes this request according to the room ID given.
  */
 
 const EOL = require('os').EOL

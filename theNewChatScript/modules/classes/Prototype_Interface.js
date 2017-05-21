@@ -18,21 +18,24 @@ var Interface = function Interface() {
     var self = this
     self.commands = {}
     self.__init__ = function initializeInterface() {
-        EXEC('ls ../interface/utils/', function (stderr, stdout) {
+        EXEC('ls ./modules/interface/utils/', function (stderr, stdout) {
             stdout.split(EOL).forEach(function (item, index) {
                 if (item != '') {
+                    // console.log('loading command ' + item + '...')
                     var __cmd__ = require('../interface/utils/' + item)
                     self.commands[__cmd__.commandName] = __cmd__.commandFunction
                 }
             })
         })
         process.stdin.on('data', function (data) {
-            var __cmd__ = data.toString().substring(0, data.toString().length - EOL.length)
-            var args = []
+            var __cli__ = data.toString().substring(0, data.toString().length - EOL.length)
+            var __cmd__ = __cli__.split(' ')[0]
+            var args = __cli__.split(' ').shift()
             self.commands[__cmd__](args)
         })
     }
     self.printMessage = function printMessage(__MsgInstance__){
+        // this function completely trust the data source.
         try {
             process.stdout.write("[" + __MsgInstance__.type + "]" +  __MsgInstance__.src + ": " + __MsgInstance__.content)
             process.stdout.write(EOL)
@@ -42,5 +45,4 @@ var Interface = function Interface() {
     }
 }
 
-var i = new Interface()
-i.__init__()
+module.exports = Interface

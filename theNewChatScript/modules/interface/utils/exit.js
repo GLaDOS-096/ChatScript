@@ -6,7 +6,9 @@
 
 const Command = require('../../classes/Prototype_Command.js')
 
-var cmd_exit = new Command('exit',function cmd_exit(){
+var cmd_exit = new Command('exit', [
+    "   Type in 'exit' to exit."
+], function cmd_exit(){
     process.exit()
 })
 
