@@ -24,14 +24,14 @@ var Interface = function Interface() {
                     // console.log('loading command ' + item + '...')
                     var __cmd__ = require('../interface/utils/' + item)
                     self.commands[__cmd__.commandName] = __cmd__.commandFunction
+                    self.commands[__cmd__.commandName].guide = __cmd__.guide
                 }
             })
         })
         process.stdin.on('data', function (data) {
             var __cli__ = data.toString().substring(0, data.toString().length - EOL.length)
             var __cmd__ = __cli__.split(' ')[0]
-            var args = __cli__.split(' ').shift()
-            self.commands[__cmd__](args)
+            self.commands[__cmd__](__cli__.split(' ').shift())
         })
     }
     self.printMessage = function printMessage(__MsgInstance__){

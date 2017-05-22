@@ -5,12 +5,12 @@
  */
 
 const Command = require('../../classes/Prototype_Command.js')
+var Interface = require('../../../app.js').Interface
 
 var cmd_help = new Command('help', [
     "   Type in 'help' plus command name to show help."
 ], function cmd_help(cmd){
-    var __cmd__ = cmd[0]
-    Interface.commmands[__cmd__].guide()
+    Interface.commands[cmd].guide()
 })
 
 module.exports = cmd_help

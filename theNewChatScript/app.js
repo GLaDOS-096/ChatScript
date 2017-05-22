@@ -3,3 +3,5 @@ const Class_MessageKeeper = require('./modules/classes/Prototype_MessageKeeper.j
 
 var Interface = new Class_Interface()
 Interface.__init__()
+
+module.exports.Interface = Interface
