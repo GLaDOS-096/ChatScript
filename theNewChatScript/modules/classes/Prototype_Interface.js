@@ -18,20 +18,36 @@ var Interface = function Interface() {
     var self = this
     self.commands = {}
     self.__init__ = function initializeInterface() {
+        console.log("Starting ChatScript Server v0.01...")
+        console.log("Initializing interface ...")
         EXEC('ls ./modules/interface/utils/', function (stderr, stdout) {
             stdout.split(EOL).forEach(function (item, index) {
                 if (item != '') {
-                    // console.log('loading command ' + item + '...')
+                    console.log('Loading command ' + item + '...')
                     var __cmd__ = require('../interface/utils/' + item)
                     self.commands[__cmd__.commandName] = __cmd__.commandFunction
                     self.commands[__cmd__.commandName].guide = __cmd__.guide
                 }
             })
+            console.log("All modules loaded.")
+            process.stdout.write("ChatScript> ")
         })
         process.stdin.on('data', function (data) {
             var __cli__ = data.toString().substring(0, data.toString().length - EOL.length)
             var __cmd__ = __cli__.split(' ')[0]
-            self.commands[__cmd__](__cli__.split(' ').shift())
+            // it be a trap or a, say, hack
+            try {
+                var params = __cli__.split(' ')[1]
+                if (params!=undefined){
+                    self.commands[__cmd__](params)
+                } else {
+                    self.commands[__cmd__]()
+                }
+            } catch(e) {
+                console.log("Command '" + __cmd__ + "' not found.")
+            } finally {
+                process.stdout.write("ChatScript> ")
+            }
         })
     }
     self.printMessage = function printMessage(__MsgInstance__){

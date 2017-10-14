@@ -10,7 +10,11 @@ var Interface = require('../../../app.js').Interface
 var cmd_help = new Command('help', [
     "   Type in 'help' plus command name to show help."
 ], function cmd_help(cmd){
-    Interface.commands[cmd].guide()
+    if (cmd==""||cmd==undefined){
+        Interface.commands["help"].guide()
+    } else {
+        Interface.commands[cmd].guide()
+    }
 })
 
 module.exports = cmd_help
